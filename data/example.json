@@ -1,0 +1,50 @@
+// 
+
+{
+    "room" : {
+      "id" : "1",
+      "name" : "Vlad's Pool Party",
+    },
+    "teams": [
+        {
+            "id": "1",
+            "name": "Arsenal"
+        }
+    ],
+    "users": [
+        {
+            "id": "1",
+            "name": "Vlad"
+        }
+    ],
+    "matches": [
+        {
+            "id": "1",
+            "date":"2024-12-15T000",
+            "competitors": [
+                {
+                    "id": "1", //team id
+                    "score": "3",
+                    "extra_score": "5"
+                },
+                {
+                    "id": "1", //team id
+                    "score": "4",
+                    "extra_score": "0"
+                }
+            ]
+        }
+    ],
+    "user_scores" : [
+        {
+            "date":"2024-12-15T000",
+            "match":"1",
+            "users":[
+                {
+                    "id":"1",
+                    "score":23424
+                }
+            ]
+        }
+    ]
+}
