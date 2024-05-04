@@ -21,6 +21,7 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
+// orig problem https://twitter.com/littmath/status/1786479662861877742
 func litt_coins_may3() [2]int {
 	flips := make([]uint8, 100)
 	for i, _ := range flips {
