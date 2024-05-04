@@ -4,55 +4,56 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"testing"
 )
 
-type Room struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
+// type Room struct {
+// 	ID   string `json:"id"`
+// 	Name string `json:"name"`
+// }
 
-type Team struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
+// type Team struct {
+// 	ID   string `json:"id"`
+// 	Name string `json:"name"`
+// }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
+// type User struct {
+// 	ID   string `json:"id"`
+// 	Name string `json:"name"`
+// }
 
-type Competitor struct {
-	ID         string `json:"id"`
-	Score      string `json:"score"`
-	ExtraScore string `json:"extra_score"`
-}
+// type Competitor struct {
+// 	ID         string `json:"id"`
+// 	Score      string `json:"score"`
+// 	ExtraScore string `json:"extra_score"`
+// }
 
-type Match struct {
-	ID          string       `json:"id"`
-	Date        string       `json:"date"`
-	Competitors []Competitor `json:"competitors"`
-}
+// type Match struct {
+// 	ID          string       `json:"id"`
+// 	Date        string       `json:"date"`
+// 	Competitors []Competitor `json:"competitors"`
+// }
 
-type UserScore struct {
-	Date  string            `json:"date"`
-	Match string            `json:"match"`
-	Users []UserScoreDetail `json:"users"`
-}
+// type UserScore struct {
+// 	Date  string            `json:"date"`
+// 	Match string            `json:"match"`
+// 	Users []UserScoreDetail `json:"users"`
+// }
 
-type UserScoreDetail struct {
-	ID    string `json:"id"`
-	Score int    `json:"score"`
-}
+// type UserScoreDetail struct {
+// 	ID    string `json:"id"`
+// 	Score int    `json:"score"`
+// }
 
-type Data struct {
-	Room       Room        `json:"room"`
-	Teams      []Team      `json:"teams"`
-	Users      []User      `json:"users"`
-	Matches    []Match     `json:"matches"`
-	UserScores []UserScore `json:"user_scores"`
-}
+// type Data struct {
+// 	Room       Room        `json:"room"`
+// 	Teams      []Team      `json:"teams"`
+// 	Users      []User      `json:"users"`
+// 	Matches    []Match     `json:"matches"`
+// 	UserScores []UserScore `json:"user_scores"`
+// }
 
-func main() {
+func TestJson(t *testing.T) {
 	jsonStr := `{
         "room" : {
           "id" : "1",

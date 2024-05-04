@@ -15,29 +15,33 @@ type Tournament struct {
 	matchID2idx map[string]uint32
 }
 
-type Match struct {
-	home       string
-	away       string
-	home_score int8
-	away_score int8
-	pens       bool
-	home_pens  int8
-	away_pens  int8
-	extra_time uint16
-	group      string
-	round      string
-}
+// type Match struct {
+// 	home       string
+// 	away       string
+// 	home_score int8
+// 	away_score int8
+// 	pens       bool
+// 	home_pens  int8
+// 	away_pens  int8
+// 	extra_time uint16
+// 	group      string
+// 	round      string
+// }
 
-type Room struct {
-}
+// type Room struct {
+// }
 
 func newMatch(home, away string, home_score, away_score int8) Match {
-	return Match{
-		home:       home,
-		away:       away,
-		home_score: home_score,
-		away_score: away_score,
-	}
+
+	c1 := Competitor{ID: "0", Score: "3", ExtraScore: ""}
+	c2 := Competitor{ID: "1", Score: "2", ExtraScore: ""}
+	return Match{ID: "3", Date: "10-10-24", Competitors: []Competitor{c1, c2}}
+	// return Match{
+	// 	home:       home,
+	// 	away:       away,
+	// 	home_score: home_score,
+	// 	away_score: away_score,
+	// }
 }
 
 // type Team string
