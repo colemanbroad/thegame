@@ -43,10 +43,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	getHandler(w, r)
 }
 
-func main() {
-
-	playermap = runTheGame()
-	panic("goodbye!")
+func startServer() {
 
 	// Handle POST and GET requests.
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

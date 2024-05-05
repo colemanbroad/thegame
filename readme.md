@@ -18,24 +18,3 @@ got the wc2023 games from manual scraping [terrikon](https://terrikon.com/en/wom
 
 maybe try [colly](https://go-colly.org/) for the future.
 
-
-game vertical
-standings horizontal
-
-enable changing name during the tournament
-
-trophy room 
-- customize character
-- your profile has a trophy room
-
-- getting data from an api is actually really valuable for hosts that are less engaged.
-- compare group against other groups!
-
-Olympics Version
-- you pick a custom 
-
-- stock market version with dynamic pricing
-- auction to set prices with exclusivity on 3x pts multiplier 
-
-mogolia: green pinecones and brown sugar - maple sugar replacement - 
-

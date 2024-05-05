@@ -12,8 +12,9 @@ type Room struct {
 }
 
 type Team struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Tournament string `json:"tournament"`
 }
 
 type User struct {
@@ -23,6 +24,7 @@ type User struct {
 
 type Competitor struct {
 	ID         string `json:"id"`
+	Name       string `json:"name"`
 	Score      string `json:"score"`
 	ExtraScore string `json:"extra_score"`
 }
@@ -51,69 +53,3 @@ type Data struct {
 	Matches    []Match     `json:"matches"`
 	UserScores []UserScore `json:"user_scores"`
 }
-
-// func main() {
-// 	jsonStr := `{
-//         "room" : {
-//           "id" : "1",
-//           "name" : "Vlad's Pool Party"
-//         },
-//         "teams": [
-//             {
-//                 "id": "1",
-//                 "name": "Arsenal"
-//             }
-//         ],
-//         "users": [
-//             {
-//                 "id": "1",
-//                 "name": "Vlad"
-//             }
-//         ],
-//         "matches": [
-//             {
-//                 "id": "1",
-//                 "date":"2024-12-15T000",
-//                 "competitors": [
-//                     {
-//                         "id": "1",
-//                         "score": "3",
-//                         "extra_score": "5"
-//                     },
-//                     {
-//                         "id": "1",
-//                         "score": "4",
-//                         "extra_score": "0"
-//                     }
-//                 ]
-//             }
-//         ],
-//         "user_scores" : [
-//             {
-//                 "date":"2024-12-15T000",
-//                 "match":"1",
-//                 "users":[
-//                     {
-//                         "id":"1",
-//                         "score":23424
-//                     }
-//                 ]
-//             }
-//         ]
-//     }`
-
-// 	var data Data
-// 	err := json.Unmarshal([]byte(jsonStr), &data)
-// 	if err != nil {
-// 		fmt.Println("Error parsing JSON: ", err)
-// 	}
-
-// 	prettyJSON, err := json.MarshalIndent(data, "", "    ") // Using four spaces for indentation
-// 	if err != nil {
-// 		log.Fatalf("Error generating pretty JSON: %v", err)
-// 	}
-
-// 	fmt.Printf("%s\n", prettyJSON)
-
-// 	// fmt.Printf("%+v\n", data)
-// }
