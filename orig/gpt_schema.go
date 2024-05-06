@@ -6,6 +6,10 @@ import (
 // "log"
 )
 
+// ----- Back -> Front schema
+// These types have already been organized by the backend with valid IDs
+//
+
 type Room struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -35,21 +39,31 @@ type Match struct {
 	Competitors []Competitor `json:"competitors"`
 }
 
-type UserScore struct {
-	Date  string            `json:"date"`
-	Match string            `json:"match"`
-	Users []UserScoreDetail `json:"users"`
+type MatchResults struct {
+	// Date   string            `json:"date"`
+	// MatchID    string       `json:"match_id"`
+	Match      Match        `json:"match"`
+	PointsList []UserPoints `json:"points_list"`
 }
 
-type UserScoreDetail struct {
-	ID    string `json:"id"`
-	Score int    `json:"score"`
+type UserPoints struct {
+	UserID string `json:"user_id"`
+	Points int    `json:"points"`
 }
 
 type Data struct {
-	Room       Room        `json:"room"`
-	Teams      []Team      `json:"teams"`
-	Users      []User      `json:"users"`
-	Matches    []Match     `json:"matches"`
-	UserScores []UserScore `json:"user_scores"`
+	Room    Room           `json:"room"`
+	Teams   []Team         `json:"teams"`
+	Users   []User         `json:"users"`
+	Matches []Match        `json:"matches"`
+	Results []MatchResults `json:"match_results"`
+}
+
+// --------
+
+// ---- Front -> Back Schema
+
+type InitialPrices struct {
+	Teams  []Team
+	Prices []float64
 }

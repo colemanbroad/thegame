@@ -4,9 +4,12 @@ import (
 	// "encoding"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
 	// "strings"
 
 	"golang.org/x/text/cases"
@@ -53,8 +56,21 @@ func createRoom(room string)        {}
 
 func newMatch(home, away, home_score, away_score, date, pens string) Match {
 
-	c1 := Competitor{ID: "", Name: home, Score: home_score, ExtraScore: pens}
-	c2 := Competitor{ID: "", Name: away, Score: away_score, ExtraScore: pens}
+	var p0, p1 string
+	if pens == "" {
+		p0 = ""
+		p1 = ""
+	} else {
+		p := strings.Split(pens, ":")
+		if len(p) != 2 {
+			log.Fatalf("Format Error: The format for penalties must be"+`\d+:\d+`+" but we got %v .\n", pens)
+		}
+		p0 = p[0]
+		p1 = p[1]
+	}
+
+	c1 := Competitor{ID: "", Name: home, Score: home_score, ExtraScore: p0}
+	c2 := Competitor{ID: "", Name: away, Score: away_score, ExtraScore: p1}
 	return Match{ID: "", Date: date, Competitors: []Competitor{c1, c2}}
 
 }
@@ -86,11 +102,17 @@ func loadGames(csvname string) []Match {
 	return games
 }
 
-func load_dan_table(csv_teams_prices_owners, csv_match_results string) Data {
+type AllData struct {
+	Data     Data
+	team_map map[string][]string
+	user_map map[string][]string
+}
 
-	records := readCsvFile(csv_teams_prices_owners)
-	countries := records[0][1:]
-	prices := records[1][1:]
+func load_dan_table(csv_teams_prices_owners, csv_match_results string) AllData {
+
+	csv_countries_prices_owners := readCsvFile(csv_teams_prices_owners)
+	countries := csv_countries_prices_owners[0][1:]
+	prices := csv_countries_prices_owners[1][1:]
 
 	for i, p := range prices {
 		c := countries[i]
@@ -103,26 +125,26 @@ func load_dan_table(csv_teams_prices_owners, csv_match_results string) Data {
 	fmt.Println()
 	fmt.Println()
 
-	teammap := make(map[string][]string)
-	playermap := make(map[string][]string)
+	team_map := make(map[string][]string)
+	user_map := make(map[string][]string)
 
 	// can each team (one per column). User names start at row 15 and stop with a blank cell.
-	for c := 1; c < len(records[0]); c++ {
+	for c := 1; c < len(csv_countries_prices_owners[0]); c++ {
 		land := countries[c-1]
-		for r := 15; r < len(records); r++ {
-			x := records[r][c]
+		for r := 15; r < len(csv_countries_prices_owners); r++ {
+			x := csv_countries_prices_owners[r][c]
 			if x == "" {
 				break
 			}
-			teammap[land] = append(teammap[land], x)
+			team_map[land] = append(team_map[land], x)
 		}
 	}
 
 	// Invert the team->players map to get player->teams
-	for team, players := range teammap {
+	for team, players := range team_map {
 		fmt.Println(team, players)
 		for _, p := range players {
-			playermap[p] = append(playermap[p], team)
+			user_map[p] = append(user_map[p], team)
 		}
 	}
 
@@ -130,27 +152,32 @@ func load_dan_table(csv_teams_prices_owners, csv_match_results string) Data {
 	fmt.Println()
 	fmt.Println()
 
-	for player, teams := range playermap {
+	for player, teams := range user_map {
 		fmt.Println(player, teams)
 	}
 
+	// now let's build the basic tables
+
+	// teams are all the countries listed at the top of Dan's spreadsheet
+	// TODO: confirm that they match all the teams from the games spreadsheet
 	room := Room{ID: "0", Name: "Dan's Game WWC 2023"}
 	team2ID := make(map[string]string)
-	teams := make([]Team, 0, len(teammap))
-	i := 0
-	for team, _ := range teammap {
+	teams := make([]Team, len(countries))
+	for i, team := range countries {
 		id := fmt.Sprint(i)
-		teams = append(teams, Team{ID: id, Name: team, Tournament: room.Name})
+		teams[i] = Team{ID: id, Name: team, Tournament: room.Name}
 		team2ID[team] = id
-		i++
 	}
 
 	fmt.Println(team2ID)
 
-	users := make([]User, 0, 50)
-	i = 0
-	for player, _ := range playermap {
-		users = append(users, User{ID: fmt.Sprint(i), Name: player})
+	// Users are all the people who bought teams
+	// We can get all the users by looking at the keys of the user_map
+	users := make([]User, 0, len(user_map))
+	i := 0
+	for u := range user_map {
+		id := fmt.Sprint(i)
+		users = append(users, User{ID: id, Name: u})
 		i++
 	}
 
@@ -164,7 +191,7 @@ func load_dan_table(csv_teams_prices_owners, csv_match_results string) Data {
 	for i := range matches {
 
 		match := &matches[i]
-		match.ID = fmt.Sprint(i + 99)
+		match.ID = fmt.Sprint(i)
 		var t string
 
 		t = match.Competitors[0].Name
@@ -177,30 +204,125 @@ func load_dan_table(csv_teams_prices_owners, csv_match_results string) Data {
 
 	}
 
-	user_scores := make([]UserScore, 1, 1400)
+	// build indexes
 
-	// for i, user := range users {
-	// 	user_scores[0]
-	// }
+	data := Data{Room: room, Teams: teams, Users: users, Matches: matches, Results: nil}
 
-	// type Data struct {
-	// 	Room       Room        `json:"room"`
-	// 	Teams      []Team      `json:"teams"`
-	// 	Users      []User      `json:"users"`
-	// 	Matches    []Match     `json:"matches"`
-	// 	UserScores []UserScore `json:"user_scores"`
-	// }
-	// Teams := Team{}
-	// Room := Room{ID: "0", Name: "Dan's Game WWC 2023"}
+	alldata := AllData{
+		Data:     data,
+		team_map: team_map,
+		user_map: user_map,
+	}
 
-	data := Data{Room: room, Teams: teams, Users: users, Matches: matches, UserScores: user_scores}
-
-	return data
-
-	// return Data{Room, Teams, Users, Matches, UserScores}
+	return alldata
 }
 
-func fill_in_user_scores(data Data) {
+func fill_in_user_scores(alldata *AllData) {
+	// fill in user scores
+	// this means we generate scores for users (after each round).
+	// we can build a map from users to scores given a list of Matches
+	// and we can filter matches by date / round.
+	// as long as we don't need to do any prediction then we don't really need to know the tournament structure!
+	// just the dates will be fine...
+	// this means we generate scores for users given
+
+	data := &alldata.Data
+
+	results := make([]MatchResults, 0, len(data.Matches))
+
+	teams_points := make(map[string]int, len(data.Matches))
+	for _, team := range data.Teams {
+		teams_points[team.Name] = 0
+	}
+
+	point_totals := make(map[string]int)
+
+	// first calculate team points
+	for idx, match := range data.Matches {
+		if idx == 62 {
+			// TODO: FIXME: We don't count the 3rd place game!!!
+			continue
+		}
+		s0 := match.Competitors[0].Score
+		s1 := match.Competitors[1].Score
+		pen0 := match.Competitors[0].ExtraScore
+		pen1 := match.Competitors[1].ExtraScore
+		n0 := match.Competitors[0].Name
+		n1 := match.Competitors[1].Name
+
+		type PtsShared struct{ p0, p1 int }
+		pts := PtsShared{p0: 0, p1: 0}
+
+		// update teams_points the total number
+		if pen0 == "" && pen1 == "" {
+			if s0 > s1 {
+				pts.p0 = 3
+			} else if s0 < s1 {
+				pts.p1 = 3
+			} else {
+				pts.p0 = 1
+				pts.p1 = 1
+			}
+		} else if pen0 > pen1 {
+			pts.p0 = 3
+		} else if pen0 < pen1 {
+			pts.p1 = 3
+		} else {
+			log.Fatalf("Invalid format: Cannot have equal, nonempty penalty scores. %v vs %v score: %v == %v .\n", n0, n1, pen0, pen1)
+		}
+
+		teams_points[n0] += pts.p0
+		teams_points[n1] += pts.p1
+
+		// loop over users that own home team and
+
+		f_user := func(user_str string) (*User, error) {
+			for _, u := range data.Users {
+				if u.Name == user_str {
+					return &u, nil
+				}
+			}
+			return nil, errors.New("User not found")
+		}
+
+		pointslist := make([]UserPoints, 0, len(data.Users))
+		for _, user_str := range alldata.team_map[n0] {
+			user, err := f_user(user_str)
+			if err != nil {
+				log.Panic(err)
+			}
+			pointslist = append(pointslist, UserPoints{UserID: user.ID, Points: pts.p0})
+			point_totals[user.Name] += pts.p0
+			if pts.p0 > 0 && user.Name == "SHAWN" {
+				fmt.Printf("Shawn got %v points for match %v vs %v ", pts.p0, match.Competitors[0].Name, match.Competitors[1].Name)
+			}
+		}
+		for _, user_str := range alldata.team_map[n1] {
+			user, err := f_user(user_str)
+			if err != nil {
+				log.Panic(err)
+			}
+			pointslist = append(pointslist, UserPoints{UserID: user.ID, Points: pts.p1})
+			point_totals[user.Name] += pts.p1
+			if pts.p1 > 0 && user.Name == "SHAWN" {
+				fmt.Printf("Shawn got %v points for match %v vs %v ", pts.p1, match.Competitors[0].Name, match.Competitors[1].Name)
+			}
+		}
+
+		results = append(results, MatchResults{Match: match, PointsList: pointslist})
+
+	}
+
+	for k, v := range teams_points {
+		fmt.Println(k, v)
+	}
+
+	fmt.Println("The point_totals in the end are .......")
+	for k, v := range point_totals {
+		fmt.Println(k, v)
+	}
+
+	data.Results = results
 }
 
 // We need to convert from our internal representation using maps to the REST API json representation
@@ -217,12 +339,15 @@ func fill_in_user_scores(data Data) {
 
 func main() {
 
-	data := load_dan_table("../data/wc2023.csv", "../data/wc2023_games.csv")
+	alldata := load_dan_table("../data/wc2023.csv", "../data/wc2023_games.csv")
 
-	prettyJSON, err := json.MarshalIndent(data, "", "    ") // Using four spaces for indentation
+	fill_in_user_scores(&alldata)
+
+	prettyJSON, err := json.MarshalIndent(alldata.Data, "", "    ") // Using four spaces for indentation
 	if err != nil {
 		log.Fatalf("Error generating pretty JSON: %v", err)
 	}
+	// _ = prettyJSON
 	fmt.Printf("%s\n", prettyJSON)
 
 }
