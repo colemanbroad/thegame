@@ -1,4 +1,4 @@
-module roster-party
+module penny-pickle-club
 
 go 1.21.3
 
