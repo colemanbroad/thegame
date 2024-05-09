@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "encoding"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -9,13 +8,10 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	// "strings"
+	"time"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	// "gonum.org/v1/plot/text"
-	// "strconv"
 )
 
 type Tournament struct {
@@ -71,8 +67,10 @@ func newMatch(home, away, home_score, away_score, date, pens string) Match {
 
 	c1 := Competitor{ID: "", Name: home, Score: home_score, ExtraScore: p0}
 	c2 := Competitor{ID: "", Name: away, Score: away_score, ExtraScore: p1}
-	return Match{ID: "", Date: date, Competitors: []Competitor{c1, c2}}
+	d, _ := time.Parse("02.01.06", date)
+	date = d.Format("2006-01-02T15")
 
+	return Match{ID: "", Date: date, Competitors: []Competitor{c1, c2}}
 }
 
 // type Team string
